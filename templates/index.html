@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8f7f0">
+    <meta name="description" content="Get thoughtful insights, fresh ideas and useful updates delivered straight to your inbox.">
+    <title>Newsletter — Good ideas, delivered.</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="premium-home">
+
+    <header class="navbar">
+        <a class="brand" href="{{ url_for('index') }}">
+            NEWSLETTER<span>.</span>
+        </a>
+
+        <a class="admin-link" href="{{ url_for('login') }}">
+            Admin Login <span aria-hidden="true">↗</span>
+        </a>
+    </header>
+
+    <main class="hero premium-hero">
+
+        <section class="hero-content">
+            <p class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                YOUR WEEKLY DOSE OF WHAT MATTERS
+            </p>
+
+            <h1>
+                Good ideas.<br>
+                <span>Delivered to you.</span>
+            </h1>
+
+            <p class="description">
+                Get useful insights, fresh ideas and the latest updates
+                delivered straight to your inbox. No noise, just value.
+            </p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="premium-flashes" aria-live="polite">
+                        {% for category, message in messages %}
+                            <p class="flash {{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form class="subscribe-form premium-form"
+                  action="{{ url_for('subscribe') }}"
+                  method="POST">
+
+                <label for="name">Your name</label>
+                <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    maxlength="100"
+                    placeholder="Enter your name"
+                    autocomplete="name"
+                    required
+                >
+
+                <label for="email">Email address</label>
+                <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                >
+
+                <button type="submit">
+                    Subscribe now <span aria-hidden="true">→</span>
+                </button>
+
+                <p class="privacy-note">
+                    <span aria-hidden="true">✳</span>
+                    Your inbox, your choice. Unsubscribe anytime.
+                </p>
+            </form>
+
+            <div class="trust-note">
+                <span class="trust-check" aria-hidden="true">✓</span>
+                Thoughtful updates. No unnecessary noise.
+            </div>
+        </section>
+
+        <section class="hero-art premium-art" aria-label="Newsletter preview">
+            <div class="art-glow"></div>
+            <div class="art-circle circle-one"></div>
+            <div class="art-circle circle-two"></div>
+
+            <div class="art-leaf leaf-one"></div>
+            <div class="art-leaf leaf-two"></div>
+
+            <article class="mail-card premium-mail-card">
+                <div class="mail-card-top">
+                    <span class="mail-icon" aria-hidden="true">✉</span>
+                    <span class="mail-sparkle" aria-hidden="true">✦</span>
+                </div>
+
+                <p class="card-label">YOUR NEXT GOOD READ</p>
+
+                <h2>
+                    A little knowledge
+                    <br>goes a long way.
+                </h2>
+
+                <div class="card-divider"></div>
+                <div class="card-line"></div>
+                <div class="card-line short"></div>
+
+                <div class="card-footer">
+                    Made for curious minds.
+                </div>
+            </article>
+
+            <div class="art-caption">
+                <span class="caption-dot"></span>
+                A little inspiration, delivered regularly.
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="premium-footer">
+        <p>© 2026 Newsletter Manager</p>
+        <p>Made for curious minds <span aria-hidden="true">✳</span></p>
+    </footer>
+
+</body>
+</html>

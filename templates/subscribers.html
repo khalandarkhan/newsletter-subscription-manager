@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8f8f4">
+    <title>Subscribers | Newsletter Manager</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="navbar">
+        <a class="brand" href="/">NEWSLETTER<span>.</span></a>
+
+        <form action="{{ url_for('logout') }}" method="POST">
+            <button type="submit" class="admin-link logout-button">
+                Logout ↗
+            </button>
+        </form>
+    </header>
+
+    <main class="dashboard">
+
+        <div class="dashboard-heading">
+            <div>
+                <p class="eyebrow">ADMINISTRATION</p>
+                <h1 class="dashboard-title">Subscribers<span>.</span></h1>
+                <p class="dashboard-description">
+                    Manage your newsletter community in one place.
+                </p>
+            </div>
+
+            <a href="/" class="primary-link">+ New subscription</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="flash {{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <p>Total subscribers</p>
+                <h2>{{ subscribers|length }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Active subscribers</p>
+                <h2>
+                    {{ subscribers
+                    |selectattr('status', 'equalto', 'active')
+                    |list|length }}
+                </h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Inactive subscribers</p>
+                <h2>
+                    {{ subscribers
+                    |selectattr('status', 'equalto', 'inactive')
+                    |list|length }}
+                </h2>
+            </div>
+        </section>
+
+        <section class="table-card">
+
+            <div class="table-heading">
+    <div>
+        <h2>All subscribers</h2>
+        <p>Search, filter and manage subscription status.</p>
+    </div>
+
+    <div class="table-actions">
+        <span class="count-badge">
+            {{ subscribers|length }} records
+        </span>
+
+        <a href="{{ url_for('export_subscribers') }}"
+           class="primary-link export-link">
+            ↓ Export CSV
+        </a>
+    </div>
+</div>
+
+            <!-- Search and status filter -->
+            <div class="subscriber-tools">
+                <input
+                    type="search"
+                    id="subscriberSearch"
+                    placeholder="Search by name or email..."
+                    aria-label="Search subscribers"
+                >
+
+                <select id="statusFilter" aria-label="Filter by status">
+                    <option value="all">All statuses</option>
+                    <option value="active">Active only</option>
+                    <option value="inactive">Inactive only</option>
+                </select>
+            </div>
+
+            <p id="searchResultCount"
+               class="search-result-count"
+               aria-live="polite"></p>
+
+            {% if subscribers %}
+                <div class="table-scroll">
+                    <table id="subscribersTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email address</th>
+                                <th>Date subscribed</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for subscriber in subscribers %}
+                                <tr>
+                                    <td class="subscriber-name">
+                                        {{ subscriber.name }}
+                                    </td>
+
+                                    <td>{{ subscriber.email }}</td>
+
+                                    <td>
+                                        {{ subscriber.subscribed_at.strftime('%d %b %Y')
+                                           if subscriber.subscribed_at else '—' }}
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge {{ subscriber.status }}">
+                                            {{ subscriber.status|capitalize }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <form
+                                            action="{{ url_for('toggle_status', subscriber_id=subscriber.id) }}"
+                                            method="POST"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="status-button"
+                                            >
+                                                {% if subscriber.status == 'active' %}
+                                                    Deactivate
+                                                {% else %}
+                                                    Activate
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noSearchResults" class="empty-state" hidden>
+                    <div class="empty-icon">⌕</div>
+                    <h3>No matching subscribers</h3>
+                    <p>Try another name, email address or status.</p>
+                    <button type="button" id="clearFilters"
+                            class="status-button">
+                        Clear filters
+                    </button>
+                </div>
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">✉</div>
+                    <h3>No subscribers yet</h3>
+                    <p>
+                        When someone subscribes, their details will appear here.
+                    </p>
+                    <a href="/" class="primary-link">
+                        Visit subscription page
+                    </a>
+                </div>
+            {% endif %}
+
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 Newsletter Manager</p>
+        <p>Manage your community thoughtfully.</p>
+    </footer>
+
+    <style>
+        .subscriber-tools {
+            display: flex;
+            gap: 14px;
+            margin: 22px 0 10px;
+        }
+
+        .subscriber-tools input,
+        .subscriber-tools select {
+            box-sizing: border-box;
+            min-height: 46px;
+            padding: 0 15px;
+            border: 1px solid #e2e7e3;
+            border-radius: 11px;
+            background: #fff;
+            color: #172b3a;
+            font: inherit;
+        }
+
+        .subscriber-tools input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .subscriber-tools select {
+            min-width: 175px;
+            cursor: pointer;
+        }
+
+        .subscriber-tools input:focus,
+        .subscriber-tools select:focus {
+            outline: 2px solid #176b5b;
+            outline-offset: 2px;
+        }
+
+        .search-result-count {
+            margin: 8px 0 18px;
+            color: #7b817e;
+            font-size: 13px;
+        }
+
+        #subscribersTable tbody tr[hidden],
+        #noSearchResults[hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 600px) {
+            .subscriber-tools {
+                flex-direction: column;
+            }
+
+            .subscriber-tools select {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput =
+                document.getElementById("subscriberSearch");
+            const statusFilter =
+                document.getElementById("statusFilter");
+            const resultCount =
+                document.getElementById("searchResultCount");
+            const table =
+                document.getElementById("subscribersTable");
+            const noResults =
+                document.getElementById("noSearchResults");
+            const clearButton =
+                document.getElementById("clearFilters");
+
+            const rows = table
+                ? Array.from(table.querySelectorAll("tbody tr"))
+                : [];
+
+            function filterSubscribers() {
+                const query = searchInput.value.trim().toLowerCase();
+                const selectedStatus = statusFilter.value;
+                let visibleCount = 0;
+
+                rows.forEach(function (row) {
+                    const name =
+                        row.cells[0].textContent.trim().toLowerCase();
+                    const email =
+                        row.cells[1].textContent.trim().toLowerCase();
+                    const status =
+                        row.cells[3].textContent.trim().toLowerCase();
+
+                    const matchesSearch =
+                        name.includes(query) || email.includes(query);
+
+                    const matchesStatus =
+                        selectedStatus === "all" ||
+                        status === selectedStatus;
+
+                    const visible = matchesSearch && matchesStatus;
+                    row.hidden = !visible;
+
+                    if (visible) visibleCount++;
+                });
+
+                resultCount.textContent =
+                    visibleCount +
+                    (visibleCount === 1
+                        ? " subscriber shown"
+                        : " subscribers shown");
+
+                if (noResults) {
+                    noResults.hidden = visibleCount !== 0;
+                }
+
+                if (table) {
+                    table.hidden = rows.length > 0 && visibleCount === 0;
+                }
+            }
+
+            searchInput.addEventListener("input", filterSubscribers);
+            statusFilter.addEventListener("change", filterSubscribers);
+
+            if (clearButton) {
+                clearButton.addEventListener("click", function () {
+                    searchInput.value = "";
+                    statusFilter.value = "all";
+                    filterSubscribers();
+                    searchInput.focus();
+                });
+            }
+
+            filterSubscribers();
+        });
+    </script>
+</body>
+</html>
